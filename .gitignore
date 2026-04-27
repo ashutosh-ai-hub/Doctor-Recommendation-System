@@ -1,4 +1,5 @@
-echo data/Final_Augmented_dataset_Diseases_and_Symptoms.csv >> .gitignore
-echo *.pkl >> .gitignore
-echo .env >> .gitignore
-echo users.db >> .gitignore
+data/Final_Augmented_dataset_Diseases_and_Symptoms.csv
+data/*.csv
+*.pkl
+.env
+users.db
