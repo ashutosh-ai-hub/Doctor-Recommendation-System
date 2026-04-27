@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHealth | AI Doctor Recommendation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <header class="app-header">
+        <div class="header-content">
+            <span class="logo">⚕️ SmartHealth AI</span>
+            <nav>
+                {% if user_name %}
+                    <span class="user-welcome">Welcome, <strong>{{ user_name }}</strong></span>
+                    <a href="{{ url_for('predict_page') }}" class="nav-link">🧠 AI Predictor</a>
+                    <a href="{{ url_for('analysis') }}" class="nav-link">📊 Data Analysis</a>
+                    <a href="{{ url_for('logout') }}" class="nav-link logout">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+                    <a href="{{ url_for('register') }}" class="nav-link signup-btn">Sign Up</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <h1>Find the Right Specialist Instantly</h1>
+            <p>Describe your symptoms and our AI will match you with the best medical experts.</p>
+        </section>
+
+        <div class="search-container">
+            <div class="filter-controls">
+                <select id="location-filter" class="location-select">
+                    <option value="All">🌍 All Locations</option>
+                </select>
+            </div>
+            <div class="input-wrapper">
+                <input type="text" id="symptom-input" placeholder="e.g. persistent cough, chest pain..." autocomplete="off">
+                <button id="analyze-btn">Analyze Symptoms</button>
+            </div>
+        </div>
+
+        <div id="result-section" class="hidden">
+            <div class="prediction-header">
+                <h2>Recommended Specialist: <span id="predicted-specialist">---</span></h2>
+            </div>
+            <div id="doctor-grid"></div>
+        </div>
+    </main>
+
+    <div id="success-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="success-icon">✅</div>
+            <h2>Appointment Confirmed!</h2>
+            <p id="modal-msg"></p>
+            <div class="appointment-id-box">
+                <span>Reference ID:</span>
+                <strong id="apt-id">---</strong>
+            </div>
+            <button id="download-btn" class="btn-secondary-modal">Download Receipt (PDF)</button>
+            <button onclick="closeModal()" class="btn-primary-modal" style="margin-top: 10px;">Done</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | SmartHealth AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
+        }
+        .sidebar {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .sidebar-logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 30px;
+            display: block;
+            text-decoration: none;
+        }
+        .side-link {
+            padding: 12px 16px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .side-link:hover, .side-link.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .dash-content {
+            padding: 40px;
+            background: transparent;
+        }
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+        }
+        .stat-card h3 {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        .stat-card .value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .user-badge {
+            background: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <a href="/" class="sidebar-logo">⚕️ SmartHealth</a>
+            <a href="/dashboard" class="side-link active">🏠 Dashboard</a>
+            <a href="#" class="side-link">📅 Appointments</a>
+            <a href="#" class="side-link">🧑‍⚕️ Doctors List</a>
+            <a href="#" class="side-link">⚙️ Settings</a>
+            <div style="margin-top: auto;">
+                <a href="/logout" class="side-link logout" style="color: #ef4444;">🚪 Logout</a>
+            </div>
+        </aside>
+
+        <main class="dash-content">
+            <header class="dash-header">
+                <h1>Welcome, {{ user_name }}!</h1>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <a href="/" class="btn-auth" style="padding: 8px 20px; text-decoration: none; font-size: 0.9rem;">+ Start Analysis</a>
+                    <div class="user-badge">
+                        <span>Patient Account</span>
+                    </div>
+                </div>
+            </header>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px;">
+                <div class="stat-card">
+                    <h3>Total Bookings</h3>
+                    <div class="value" style="color: var(--primary);">12</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Completed</h3>
+                    <div class="value" style="color: #10b981;">08</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Pending</h3>
+                    <div class="value" style="color: #f59e0b;">04</div>
+                </div>
+            </div>
+
+            <div class="stat-card" style="margin-top: 30px; padding: 30px;">
+                <h3 style="font-size: 1.2rem; margin-bottom: 20px;">Symptom Search Trends</h3>
+                <canvas id="myChart" height="100"></canvas>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('myChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                datasets: [{
+                    label: 'Symptom Searches',
+                    data: [12, 19, 3, 5, 2, 3],
+                    borderColor: '#0284c7',
+                    backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

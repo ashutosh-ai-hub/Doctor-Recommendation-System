@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Analysis | SmartHealth</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .analysis-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .chart-card {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .chart-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .insight-box {
+            background: #f0f9ff;
+            border-left: 5px solid #0284c7;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 0 12px 12px 0;
+        }
+        .insight-box h3 { margin-top: 0; color: #0284c7; }
+        .insight-box ul { margin-bottom: 0; }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-content">
+            <span class="logo">⚕️ SmartHealth AI</span>
+            <nav>
+                <a href="/" class="nav-link">Home</a>
+                <a href="/predict_page" class="nav-link">Predict Disease</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="analysis-container">
+        <h1 style="text-align: center; margin-bottom: 40px;">📊 Exploratory Data Analysis</h1>
+
+        <div class="insight-box">
+            <h3>Key Data Insights</h3>
+            <ul>
+                <li>The dataset contains <strong>542 doctors</strong> across <strong>16 different specializations</strong>.</li>
+                <li><strong>Delhi</strong> is the primary hub with the highest concentration of doctors (68 professionals).</li>
+                <li><strong>Orthopedic</strong> is the most common specialization available in our current network.</li>
+                <li>The average doctor rating is a solid <strong>4.25 / 5.0</strong>, indicating high service quality.</li>
+            </ul>
+        </div>
+
+        <div class="chart-card">
+            <h2>Specialization Distribution</h2>
+            <p style="color: #64748b; margin-bottom: 20px;">Analysis of doctor availability across different medical fields.</p>
+            <img src="{{ url_for('static', filename='images/eda/specialization_dist.png') }}" alt="Specialization Chart">
+        </div>
+
+        <div class="chart-card">
+            <h2>Geographical Distribution</h2>
+            <p style="color: #64748b; margin-bottom: 20px;">Tracking the number of healthcare professionals by city.</p>
+            <img src="{{ url_for('static', filename='images/eda/location_dist.png') }}" alt="Location Chart">
+        </div>
+
+        <div class="chart-card">
+            <h2>Disease Dataset Overview</h2>
+            <p style="color: #64748b; margin-bottom: 20px;">Overview of the diseases used for training our AI prediction model.</p>
+            <img src="{{ url_for('static', filename='images/eda/disease_dist.png') }}" alt="Disease Chart">
+        </div>
+
+        <div class="chart-card">
+            <h2>Model Performance (Confusion Matrix)</h2>
+            <p style="color: #64748b; margin-bottom: 20px;">Evaluation of the Decision Tree model using a confusion matrix.</p>
+            <img src="{{ url_for('static', filename='images/eda/confusion_matrix.png') }}" alt="Confusion Matrix">
+        </div>
+
+        <div style="text-align: center; margin-top: 50px;">
+            <a href="/" class="btn-auth" style="display: inline-block; width: auto; padding: 15px 40px;">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>

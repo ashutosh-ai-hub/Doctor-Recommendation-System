@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Disease Predictor | SmartHealth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        }
+
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .predict-container {
+            max-width: 700px;
+            margin: 60px auto;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+
+        .header-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        h1 {
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #475569;
+            font-size: 0.9rem;
+        }
+
+        .input-pill {
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .input-pill:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+        }
+
+        .btn-predict {
+            width: 100%;
+            padding: 16px;
+            border-radius: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(14, 165, 233, 0.2);
+        }
+
+        .btn-predict:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
+        }
+
+        .result-card {
+            margin-top: 40px;
+            padding: 30px;
+            border-radius: 24px;
+            background: white;
+            border: 2px solid #e0f2fe;
+            display: none;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .disease-highlight {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 16px;
+            display: inline-block;
+            margin: 15px 0;
+            border: 1px solid #bae6fd;
+        }
+
+        #result-disease {
+            color: var(--primary-dark);
+            font-weight: 800;
+            font-size: 1.8rem;
+            margin: 0;
+            text-transform: capitalize;
+        }
+
+        .specialist-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #fef3c7;
+            color: #92400e;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        .doctor-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 25px;
+            text-align: left;
+        }
+
+        .doc-item {
+            padding: 20px;
+            border-radius: 18px;
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            transition: all 0.3s ease;
+        }
+
+        .doc-item:hover {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .doc-name { font-weight: 700; font-size: 1.1rem; color: #1e293b; margin-bottom: 5px; }
+        .doc-meta { font-size: 0.9rem; color: #64748b; display: flex; gap: 15px; }
+        .rating-chip { background: #fffbeb; color: #b45309; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; }
+        
+        .back-home {
+            margin-top: 30px;
+            display: inline-block;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .back-home:hover { color: var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="predict-container">
+        <span class="header-icon">🧠</span>
+        <h1>AI Health Assistant</h1>
+        <p style="color: #64748b;">Powered by Advanced Decision Tree Logic</p>
+        
+        <form id="predict-form">
+            <div class="form-group">
+                <label class="form-label">📍 Your Location</label>
+                <select id="predict-location" class="input-pill">
+                    <option value="All">All Cities</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">🤒 Enter Symptoms</label>
+                <input type="text" name="symptoms" id="symptoms" class="input-pill" placeholder="e.g. fever, headache, cough" required>
+            </div>
+
+            <button type="submit" class="btn-predict" id="sub-btn">Analyze Health Now</button>
+        </form>
+
+        <div id="prediction-result" class="result-card">
+            <h3 style="color: #64748b; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">AI Diagnosis Result</h3>
+            
+            <div class="disease-highlight">
+                <p id="result-disease">---</p>
+            </div>
+            
+            <br>
+            <span id="specialist-msg" class="specialist-badge">---</span>
+            
+            <div id="recommended-doctors-section" style="margin-top: 40px;">
+                <h4 style="color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Recommended Top Experts</h4>
+                <div id="predict-doctor-grid" class="doctor-grid"></div>
+            </div>
+
+            <a href="/" class="back-home">← Return to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        async function loadLocations() {
+            const resp = await fetch('/api/locations');
+            const data = await resp.json();
+            const select = document.getElementById('predict-location');
+            if (data.locations) {
+                data.locations.forEach(loc => {
+                    const opt = document.createElement('option');
+                    opt.value = loc;
+                    opt.textContent = loc;
+                    select.appendChild(opt);
+                });
+            }
+        }
+        loadLocations();
+
+        document.getElementById('predict-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const symptoms = document.getElementById('symptoms').value;
+            const location = document.getElementById('predict-location').value;
+            const btn = document.getElementById('sub-btn');
+            
+            btn.innerText = "🔍 Processing Data...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symptoms, location })
+                });
+                const data = await response.json();
+                
+                if (data.prediction) {
+                    document.getElementById('prediction-result').style.display = 'block';
+                    document.getElementById('result-disease').innerText = data.prediction;
+                    document.getElementById('specialist-msg').innerText = `Recommended: ${data.specialization} Specialist`;
+                    
+                    const grid = document.getElementById('predict-doctor-grid');
+                    grid.innerHTML = '';
+                    
+                    if (data.doctors && data.doctors.length > 0) {
+                        data.doctors.forEach(doc => {
+                            const item = document.createElement('div');
+                            item.className = 'doc-item';
+                            item.innerHTML = `
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div>
+                                        <div class="doc-name">${doc.name}</div>
+                                        <div class="doc-meta">
+                                            <span>💼 ${doc.experience}y Exp</span>
+                                            <span>📍 ${doc.location}</span>
+                                        </div>
+                                    </div>
+                                    <div class="rating-chip">⭐ ${doc.rating}</div>
+                                </div>
+                            `;
+                            grid.appendChild(item);
+                        });
+                    } else {
+                        grid.innerHTML = `<p style="color: #64748b; font-style: italic;">No specific ${data.specialization}s found in ${location}. Try searching for all locations.</p>`;
+                    }
+                    
+                    // Smooth scroll to results
+                    document.getElementById('prediction-result').scrollIntoView({ behavior: 'smooth' });
+
+                } else {
+                    alert(data.error || "Prediction failed.");
+                }
+            } catch (err) {
+                alert("Server connection error.");
+            } finally {
+                btn.innerText = "Analyze Health Now";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
