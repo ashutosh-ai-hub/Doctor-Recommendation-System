@@ -16,7 +16,6 @@
             <nav>
                 {% if user_name %}
                     <span class="user-welcome">Welcome, <strong>{{ user_name }}</strong></span>
-                    <a href="{{ url_for('predict_page') }}" class="nav-link">🧠 AI Predictor</a>
                     <a href="{{ url_for('analysis') }}" class="nav-link">📊 Data Analysis</a>
                     <a href="{{ url_for('logout') }}" class="nav-link logout">Logout</a>
                 {% else %}
