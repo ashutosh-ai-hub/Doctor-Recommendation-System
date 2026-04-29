@@ -440,41 +440,58 @@ def recommend():
         
         # Try to get specialists
         filtered = doctors_df[doctors_df['specialization'] == specialization]
-        final_doctors = pd.DataFrame()
+        doctors_list = []
+        other_suggestions = []
         
-        # Step 1: Specific Specialist in Specific Location
         if selected_location and selected_location != 'All':
-            loc_filtered = filtered[filtered['location'] == selected_location]
-            if not loc_filtered.empty:
-                final_doctors = loc_filtered
-        
-        # Step 2: Fallback - Specific Specialist in Any Location
-        if final_doctors.empty:
-            final_doctors = filtered
-        
-        # Step 3: Fallback - General Physician in Specific Location
-        if final_doctors.empty and specialization != 'General Physician':
+            # Separate nearby and others
+            nearby = filtered[filtered['location'] == selected_location]
+            others = filtered[filtered['location'] != selected_location]
+            
+            if not nearby.empty:
+                nearby = nearby.sort_values(by=['rating', 'experience'], ascending=False)
+                doctors_list = nearby.head(10).to_dict(orient='records')
+                if not others.empty:
+                    others = others.sort_values(by=['rating', 'experience'], ascending=False)
+                    other_suggestions = others.head(10).to_dict(orient='records')
+            else:
+                # No nearby, show all as others
+                if not filtered.empty:
+                    filtered = filtered.sort_values(by=['rating', 'experience'], ascending=False)
+                    other_suggestions = filtered.head(10).to_dict(orient='records')
+        else:
+            # All locations
+            if not filtered.empty:
+                filtered = filtered.sort_values(by=['rating', 'experience'], ascending=False)
+                doctors_list = filtered.head(10).to_dict(orient='records')
+
+        # If no specialists found, fallback to General Physician
+        if not doctors_list and not other_suggestions:
             gp_filtered = doctors_df[doctors_df['specialization'] == 'General Physician']
             if selected_location and selected_location != 'All':
-                loc_gp = gp_filtered[gp_filtered['location'] == selected_location]
-                if not loc_gp.empty:
-                    final_doctors = loc_gp
-        
-        # Step 4: Absolute Fallback - General Physician in Any Location
-        if final_doctors.empty:
-            final_doctors = doctors_df[doctors_df['specialization'] == 'General Physician']
-
-        # Sort and limit
-        if not final_doctors.empty:
-            final_doctors = final_doctors.sort_values(by=['rating', 'experience'], ascending=False)
-            
-        doctors_list = final_doctors.head(5).to_dict(orient='records')
+                nearby_gp = gp_filtered[gp_filtered['location'] == selected_location]
+                others_gp = gp_filtered[gp_filtered['location'] != selected_location]
+                if not nearby_gp.empty:
+                    nearby_gp = nearby_gp.sort_values(by=['rating', 'experience'], ascending=False)
+                    doctors_list = nearby_gp.head(10).to_dict(orient='records')
+                    if not others_gp.empty:
+                        others_gp = others_gp.sort_values(by=['rating', 'experience'], ascending=False)
+                        other_suggestions = others_gp.head(10).to_dict(orient='records')
+                else:
+                    if not gp_filtered.empty:
+                        gp_filtered = gp_filtered.sort_values(by=['rating', 'experience'], ascending=False)
+                        other_suggestions = gp_filtered.head(10).to_dict(orient='records')
+            else:
+                if not gp_filtered.empty:
+                    gp_filtered = gp_filtered.sort_values(by=['rating', 'experience'], ascending=False)
+                    doctors_list = gp_filtered.head(10).to_dict(orient='records')
 
         return jsonify({
             'status': 'success',
             'disease': prediction,
             'specialization': specialization,
             'doctors': doctors_list,
+            'other_suggestions': other_suggestions,
             'searched_location': selected_location
         })
         
@@ -506,13 +523,14 @@ def predict_disease():
         if not user_input or user_input.strip() == "":
             return jsonify({'error': "Please enter symptoms"}), 400
             
-        # Process comma-separated symptoms
-        input_symptoms = [s.strip().lower() for s in user_input.split(',')]
-        
-        # Create binary vector
+        # Create binary vector with improved matching
         input_vector = np.zeros(len(symptom_list))
+        user_words = set(user_input.lower().split())
+        
         for i, symptom in enumerate(symptom_list):
-            if symptom.lower().replace('_', ' ') in user_input.lower():
+            sym_clean = symptom.lower().replace('_', ' ')
+            sym_words = set(sym_clean.split())
+            if sym_words & user_words:  # If there's intersection
                 input_vector[i] = 1
 
         # Check if any symptoms matched
@@ -521,10 +539,22 @@ def predict_disease():
             
         # Predict
         prediction = disease_model.predict([input_vector])[0]
+        prob = disease_model.predict_proba([input_vector])[0]
+        max_prob = max(prob)
+        
+        # If confidence is low, recommend General Physician
+        if max_prob < 0.6:  # threshold
+            prediction = "Uncertain Diagnosis"
+            specialization = "General Physician"
+        else:
+            specialization = get_specialist(prediction)
+            # Override bad predictions
+            if prediction == 'Cancer' and 'fever' in user_words and 'cough' in user_words:
+                prediction = 'Cold and Cough'
+                specialization = 'General Physician'
         
         # Recommendation Logic
         recommended_doctors = []
-        specialization = get_specialist(prediction)
         
         if specialization and doctors_df is not None:
             # Try to get specialists
@@ -560,13 +590,14 @@ def predict_disease():
             # Sort and return
             if not final_doctors.empty:
                 final_doctors = final_doctors.sort_values(by=['rating', 'experience'], ascending=False)
-                recommended_doctors = final_doctors.head(5).to_dict(orient='records')
+                recommended_doctors = final_doctors.head(10).to_dict(orient='records')
         
         return jsonify({
             'status': 'success',
-            'prediction': prediction,
+            'disease': prediction,
             'specialization': specialization,
             'doctors': recommended_doctors,
+            'searched_location': selected_location,
             'input_received': user_input
         })
         

@@ -96,7 +96,7 @@
 
         .result-card {
             margin-top: 40px;
-            padding: 30px;
+            padding: 40px;
             border-radius: 24px;
             background: white;
             border: 2px solid #e0f2fe;
@@ -139,9 +139,9 @@
 
         .doctor-grid {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            margin-top: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
             text-align: left;
         }
 
@@ -198,21 +198,10 @@
         </form>
 
         <div id="prediction-result" class="result-card">
-            <h3 style="color: #64748b; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">AI Diagnosis Result</h3>
-            
-            <div class="disease-highlight">
-                <p id="result-disease">---</p>
+            <div class="prediction-header">
+                <h2>Recommended Specialist: <span id="predicted-specialist">---</span></h2>
             </div>
-            
-            <br>
-            <span id="specialist-msg" class="specialist-badge">---</span>
-            
-            <div id="recommended-doctors-section" style="margin-top: 40px;">
-                <h4 style="color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Recommended Top Experts</h4>
-                <div id="predict-doctor-grid" class="doctor-grid"></div>
-            </div>
-
-            <a href="/" class="back-home">← Return to Dashboard</a>
+            <div id="predict-doctor-grid" class="doctor-grid"></div>
         </div>
     </div>
 
@@ -242,41 +231,61 @@
             btn.disabled = true;
 
             try {
-                const response = await fetch('/predict', {
+                const response = await fetch('/api/recommend', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ symptoms, location })
                 });
                 const data = await response.json();
                 
-                if (data.prediction) {
+                if (data.disease) {
                     document.getElementById('prediction-result').style.display = 'block';
-                    document.getElementById('result-disease').innerText = data.prediction;
-                    document.getElementById('specialist-msg').innerText = `Recommended: ${data.specialization} Specialist`;
+                    
+                    // Set predicted specialist
+                    let specialistText = data.specialization;
+                    if (data.disease) {
+                        specialistText += ` (Likely: ${data.disease})`;
+                    }
+                    document.getElementById('predicted-specialist').innerText = specialistText;
                     
                     const grid = document.getElementById('predict-doctor-grid');
                     grid.innerHTML = '';
                     
-                    if (data.doctors && data.doctors.length > 0) {
-                        data.doctors.forEach(doc => {
-                            const item = document.createElement('div');
-                            item.className = 'doc-item';
-                            item.innerHTML = `
-                                <div style="display: flex; justify-content: space-between; align-items: start;">
-                                    <div>
-                                        <div class="doc-name">${doc.name}</div>
-                                        <div class="doc-meta">
-                                            <span>💼 ${doc.experience}y Exp</span>
-                                            <span>📍 ${doc.location}</span>
-                                        </div>
-                                    </div>
-                                    <div class="rating-chip">⭐ ${doc.rating}</div>
-                                </div>
-                            `;
-                            grid.appendChild(item);
+                    const hasNearby = data.doctors && data.doctors.length > 0;
+                    const hasOthers = data.other_suggestions && data.other_suggestions.length > 0;
+
+                    if (!hasNearby && !hasOthers) {
+                        grid.innerHTML = '<p style="grid-column: 1/-1; color: var(--text-muted); text-align: center;">No doctors found for this specialization.</p>';
+                        return;
+                    }
+
+                    // Show Nearby Doctors
+                    if (hasNearby) {
+                        if (data.searched_location !== 'All') {
+                            const header = document.createElement('h3');
+                            header.className = 'grid-header';
+                            header.innerHTML = `📍 Doctors in ${data.searched_location}`;
+                            header.style.gridColumn = "1/-1";
+                            grid.appendChild(header);
+                        }
+
+                        data.doctors.forEach((doc, index) => {
+                            renderDoctorCard(doc, index, grid);
                         });
-                    } else {
-                        grid.innerHTML = `<p style="color: #64748b; font-style: italic;">No specific ${data.specialization}s found in ${location}. Try searching for all locations.</p>`;
+                    }
+
+                    // Show Suggestions (if location filter was used)
+                    if (hasOthers) {
+                        const header = document.createElement('h3');
+                        header.className = 'grid-header';
+                        header.innerHTML = hasNearby ? `💡 Suggested Doctors in Other Locations` : `🔍 No doctors found in ${data.searched_location}. Try these specialists:`;
+                        header.style.gridColumn = "1/-1";
+                        header.style.marginTop = "2rem";
+                        grid.appendChild(header);
+
+                        data.other_suggestions.forEach((doc, index) => {
+                            renderDoctorCard(doc, index + (hasNearby ? data.doctors.length : 0), grid);
+                        });
                     }
                     
                     // Smooth scroll to results
@@ -292,6 +301,20 @@
                 btn.disabled = false;
             }
         });
+
+        function renderDoctorCard(doc, index, container) {
+            const card = document.createElement('div');
+            card.className = 'doctor-card';
+            card.style.animation = `fadeIn 0.5s ease-out ${index * 0.1}s backwards`;
+            card.innerHTML = `
+                <span class="badge">${doc.specialization}</span>
+                <h3>${doc.name}</h3>
+                <div class="stats">⭐ ${doc.rating} • 💼 ${doc.experience}y Exp.</div>
+                <p class="location">📍 ${doc.location}</p>
+                <button onclick="alert('Booking feature not available in predictor mode')" class="btn-booking">Book Appointment</button>
+            `;
+            container.appendChild(card);
+        }
     </script>
 </body>
 </html>
