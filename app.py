@@ -10,6 +10,7 @@ import re
 import smtplib
 import ssl
 from email.message import EmailMessage
+from datetime import datetime, timedelta
 
 # Load environment variables
 load_dotenv()
@@ -37,6 +38,13 @@ def init_db():
                   name TEXT NOT NULL, 
                   email TEXT UNIQUE NOT NULL, 
                   password TEXT NOT NULL)''')
+    # Table to store password reset tokens
+    c.execute('''CREATE TABLE IF NOT EXISTS password_resets
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  user_id INTEGER NOT NULL,
+                  token TEXT UNIQUE NOT NULL,
+                  expires_at TEXT NOT NULL,
+                  FOREIGN KEY(user_id) REFERENCES users(id))''')
     conn.commit()
     conn.close()
 
@@ -353,11 +361,11 @@ def register():
             conn.commit()
             conn.close()
 
-            # Auto-login the newly registered user and render dashboard/home directly
+            # Auto-login the newly registered user and redirect to dashboard
             session['user_id'] = user_id
             session['user_name'] = name
             flash("Registration successful — welcome!", "success")
-            return render_template('index.html', user_name=name)
+            return redirect(url_for('dashboard'))
         except Exception as e:
             # Log the exception for debugging
             app.logger.exception("Error during registration")
@@ -401,59 +409,69 @@ def logout():
 def forgot_password():
     if request.method == 'POST':
         email = request.form.get('email')
+        app.logger.warning(f"[FORGOT] Request for email: [{email}]")
+        app.logger.warning(f"[FORGOT] Current working dir: {os.getcwd()}")
+        app.logger.warning(f"[FORGOT] DB file exists: {os.path.exists('users.db')}")
         
         conn = sqlite3.connect('users.db')
         c = conn.cursor()
         c.execute("SELECT * FROM users WHERE email=?", (email,))
         user = c.fetchone()
         conn.close()
-        # Generate a temporary password and attempt to email it to the user.
+        app.logger.warning(f"[FORGOT] User lookup result: {user}")
+        # Better flow: generate a secure reset token and email a reset link.
         import secrets
-        temp_pw = secrets.token_urlsafe(8)
-        hashed_temp = generate_password_hash(temp_pw)
+        token = secrets.token_urlsafe(48)
+        expires_at = (datetime.utcnow() + timedelta(hours=1)).isoformat()
 
         if user:
-            # Update DB with temporary password first
+            user_id = user[0]
             conn = sqlite3.connect('users.db')
             c = conn.cursor()
-            c.execute("UPDATE users SET password=? WHERE email=?", (hashed_temp, email))
+            # remove any existing tokens for user
+            c.execute("DELETE FROM password_resets WHERE user_id=?", (user_id,))
+            # store raw token for link-based reset
+            c.execute("INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)", (user_id, token, expires_at))
             conn.commit()
             conn.close()
 
-            # Attempt to send email using SMTP configuration from environment
+            reset_link = url_for('reset_password', token=token, _external=True)
+
             smtp_server = os.environ.get('SMTP_SERVER')
             smtp_port = int(os.environ.get('SMTP_PORT', 587))
             smtp_user = os.environ.get('SMTP_USERNAME')
             smtp_pass = os.environ.get('SMTP_PASSWORD')
             smtp_from = os.environ.get('SMTP_FROM', smtp_user)
 
+            # Try to send reset link via email; if SMTP not configured or send fails, show link on page as fallback
             if smtp_server and smtp_user and smtp_pass:
                 try:
                     msg = EmailMessage()
                     msg['Subject'] = 'SmartHealth AI — Password Reset'
                     msg['From'] = smtp_from
                     msg['To'] = email
-                    msg.set_content(f"Hello,\n\nA temporary password has been generated for your SmartHealth AI account.\n\nTemporary password: {temp_pw}\n\nPlease login and change your password immediately.\n\nIf you did not request this, please contact support.\n\n— SmartHealth AI Team")
+                    msg.set_content(f"Hello,\n\nWe received a request to reset your SmartHealth AI password.\n\nClick the link below to set a new password (valid for 1 hour):\n\n{reset_link}\n\nIf you did not request this, ignore this message.\n\n— SmartHealth AI Team")
 
                     context = ssl.create_default_context()
-                    with smtplib.SMTP(smtp_server, smtp_port) as server:
+                    with smtplib.SMTP(smtp_server, smtp_port, timeout=10) as server:
                         server.starttls(context=context)
                         server.login(smtp_user, smtp_pass)
                         server.send_message(msg)
 
-                    flash("A temporary password has been emailed to you. Check your inbox.", "success")
-                except Exception as e:
-                    # If email fails, fall back to flashing temp password (development fallback)
-                    flash(f"Email sending failed ({str(e)}). Temporary password: {temp_pw}", "warning")
+                    # render a confirmation message (masked email shown in template)
+                    return render_template('forgot_password.html', email=email, reset_sent=True)
+                except Exception:
+                    app.logger.exception('SMTP send failed')
+                    # fallback: show reset link on page
+                    return render_template('forgot_password.html', reset_link=reset_link)
             else:
-                # SMTP not configured — show temporary password on screen (dev fallback)
-                flash(f"Temporary password generated: {temp_pw} — please login and change it.", "success")
-        else:
-            # Keep messaging generic to avoid leaking account existence
-            flash("If this email exists, a password reset link has been sent. Check your email.", "success")
+                # SMTP not configured — show reset link on page (dev fallback)
+                return render_template('forgot_password.html', reset_link=reset_link)
 
-        # Redirect to login after handling reset
-        return redirect(url_for('login'))
+        # generic fallback for non-existing emails
+        app.logger.warning(f"[FORGOT] Email not found or hidden: [{email}]")
+        flash("If this email exists, a password reset link has been sent. Check your email.", "success")
+        return render_template('forgot_password.html', email=email, reset_sent=True)
     
     return render_template('forgot_password.html')
 
@@ -462,6 +480,56 @@ def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('dashboard.html', user_name=session.get('user_name'))
+
+
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    # validate token
+    conn = sqlite3.connect('users.db')
+    c = conn.cursor()
+    c.execute("SELECT user_id, expires_at FROM password_resets WHERE token=?", (token,))
+    row = c.fetchone()
+    conn.close()
+
+    if not row:
+        flash('Invalid or expired reset link.', 'danger')
+        return redirect(url_for('login'))
+
+    user_id, expires_at = row
+    expires_dt = datetime.fromisoformat(expires_at)
+    if datetime.utcnow() > expires_dt:
+        # token expired
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute("DELETE FROM password_resets WHERE token=?", (token,))
+        conn.commit()
+        conn.close()
+        flash('Reset link has expired. Please request a new one.', 'danger')
+        return redirect(url_for('forgot_password'))
+
+    if request.method == 'POST':
+        pw = request.form.get('password')
+        confirm = request.form.get('confirm_password')
+        if not pw or len(pw) < 6:
+            flash('Password must be at least 6 characters.', 'danger')
+            return render_template('reset_password.html', token=token)
+        if pw != confirm:
+            flash('Passwords do not match.', 'danger')
+            return render_template('reset_password.html', token=token)
+
+        hashed = generate_password_hash(pw)
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute("UPDATE users SET password=? WHERE id=?", (hashed, user_id))
+        c.execute("DELETE FROM password_resets WHERE token=?", (token,))
+        conn.commit()
+        conn.close()
+
+        flash('Password has been changed. Please login with your new password.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html', token=token)
+
 
 @app.route('/api/locations', methods=['GET'])
 def get_locations():
