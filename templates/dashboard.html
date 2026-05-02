@@ -22,6 +22,18 @@
             flex-direction: column;
             gap: 10px;
         }
+        .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-main);
+            padding: 10px;
+        }
+        .sidebar-toggle:hover {
+            color: var(--primary);
+        }
         .sidebar-logo {
             font-size: 1.4rem;
             font-weight: 700;
@@ -54,6 +66,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 30px;
+            gap: 15px;
+            flex-wrap: wrap;
         }
         .stat-card {
             background: var(--bg-card);
@@ -81,11 +95,78 @@
             font-weight: 600;
             color: var(--primary);
         }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+        
+        @media (max-width: 991px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar-toggle {
+                display: block;
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 60px;
+                width: 260px;
+                height: calc(100vh - 60px);
+                padding: 20px;
+                z-index: 98;
+                transition: left 0.3s ease;
+                border-right: 1px solid var(--border);
+                overflow-y: auto;
+            }
+            
+            .sidebar.active {
+                left: 0;
+                box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+            }
+            
+            .dash-content {
+                padding: 30px 15px;
+            }
+            
+            .dash-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .dash-content {
+                padding: 20px 12px;
+            }
+            
+            .stat-card {
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .dash-header h1 {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="dashboard-layout">
-        <aside class="sidebar">
+        <button class="sidebar-toggle" id="sidebar-toggle">☰</button>
+        <aside class="sidebar" id="sidebar">
             <a href="/" class="sidebar-logo">⚕️ SmartHealth</a>
             <a href="/dashboard" class="side-link active">🏠 Dashboard</a>
             <a href="#" class="side-link">📅 Appointments</a>
@@ -99,7 +180,7 @@
         <main class="dash-content">
             <header class="dash-header">
                 <h1>Welcome, {{ user_name }}!</h1>
-                <div style="display: flex; gap: 15px; align-items: center;">
+                <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
                     <a href="/" class="btn-auth" style="padding: 8px 20px; text-decoration: none; font-size: 0.9rem;">+ Start Analysis</a>
                     <div class="user-badge">
                         <span>Patient Account</span>
@@ -107,7 +188,7 @@
                 </div>
             </header>
 
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px;">
+            <div class="stats-grid">
                 <div class="stat-card">
                     <h3>Total Bookings</h3>
                     <div class="value" style="color: var(--primary);">12</div>
@@ -130,6 +211,34 @@
     </div>
 
     <script>
+        // Sidebar toggle for mobile
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                    sidebarToggle.style.color = sidebar.classList.contains('active') ? 'var(--primary)' : 'var(--text-main)';
+                });
+                
+                // Close sidebar when a link is clicked
+                sidebar.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        sidebar.classList.remove('active');
+                        sidebarToggle.style.color = 'var(--text-main)';
+                    });
+                });
+                
+                // Close sidebar on window resize
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth > 991) {
+                        sidebar.classList.remove('active');
+                    }
+                });
+            }
+        });
+        
         const ctx = document.getElementById('myChart').getContext('2d');
         new Chart(ctx, {
             type: 'line',

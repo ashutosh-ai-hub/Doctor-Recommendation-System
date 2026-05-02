@@ -7,6 +7,9 @@ import numpy as np
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import re
+import smtplib
+import ssl
+from email.message import EmailMessage
 
 # Load environment variables
 load_dotenv()
@@ -313,26 +316,62 @@ def register():
     if request.method == 'POST':
         name = request.form.get('name')
         email = request.form.get('email')
+        app.logger.warning(f"REGISTER EMAIL RECEIVED: [{email}]")
         password = request.form.get('password')
-        
+        # Basic server-side validation
+        if not name or not email or not password:
+            flash("Please provide name, email, and password.", "danger")
+            return redirect(url_for('register'))
+
+        # simple email format check
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            flash("Please provide a valid email address.", "danger")
+            return redirect(url_for('register'))
+
+        if len(password) < 6:
+            flash("Password must be at least 6 characters.", "danger")
+            return redirect(url_for('register'))
+
         hashed_pw = generate_password_hash(password)
-        
+
         try:
+            app.logger.info(f"Register attempt for email: {email}")
             conn = sqlite3.connect('users.db')
             c = conn.cursor()
+            # Check for existing email first to give a clear message
+            c.execute("SELECT id FROM users WHERE email=?", (email,))
+            existing = c.fetchone()
+            app.logger.info(f"Existing check result: {existing}")
+            if existing:
+                conn.close()
+                flash("Email is already registered. Please login or use a different email.", "warning")
+                return redirect(url_for('login'))
+
             c.execute("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", (name, email, hashed_pw))
+            user_id = c.lastrowid
+            app.logger.info(f"Inserted user id: {user_id}")
             conn.commit()
             conn.close()
-            flash("Registration successful! Please login.", "success")
-            return redirect(url_for('login'))
+
+            # Auto-login the newly registered user and render dashboard/home directly
+            session['user_id'] = user_id
+            session['user_name'] = name
+            flash("Registration successful — welcome!", "success")
+            return render_template('index.html', user_name=name)
         except Exception as e:
-            flash(f"Email already registered or database error!", "danger")
+            # Log the exception for debugging
+            app.logger.exception("Error during registration")
+            flash("An unexpected error occurred during registration. Please try again.", "danger")
             return redirect(url_for('register'))
             
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # If already logged in, send to home/dashboard
+    if 'user_id' in session:
+        return redirect(url_for('home'))
+
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -356,7 +395,67 @@ def login():
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('home'))
+    return redirect(url_for('login'))
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+        c.execute("SELECT * FROM users WHERE email=?", (email,))
+        user = c.fetchone()
+        conn.close()
+        # Generate a temporary password and attempt to email it to the user.
+        import secrets
+        temp_pw = secrets.token_urlsafe(8)
+        hashed_temp = generate_password_hash(temp_pw)
+
+        if user:
+            # Update DB with temporary password first
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+            c.execute("UPDATE users SET password=? WHERE email=?", (hashed_temp, email))
+            conn.commit()
+            conn.close()
+
+            # Attempt to send email using SMTP configuration from environment
+            smtp_server = os.environ.get('SMTP_SERVER')
+            smtp_port = int(os.environ.get('SMTP_PORT', 587))
+            smtp_user = os.environ.get('SMTP_USERNAME')
+            smtp_pass = os.environ.get('SMTP_PASSWORD')
+            smtp_from = os.environ.get('SMTP_FROM', smtp_user)
+
+            if smtp_server and smtp_user and smtp_pass:
+                try:
+                    msg = EmailMessage()
+                    msg['Subject'] = 'SmartHealth AI — Password Reset'
+                    msg['From'] = smtp_from
+                    msg['To'] = email
+                    msg.set_content(f"Hello,\n\nA temporary password has been generated for your SmartHealth AI account.\n\nTemporary password: {temp_pw}\n\nPlease login and change your password immediately.\n\nIf you did not request this, please contact support.\n\n— SmartHealth AI Team")
+
+                    context = ssl.create_default_context()
+                    with smtplib.SMTP(smtp_server, smtp_port) as server:
+                        server.starttls(context=context)
+                        server.login(smtp_user, smtp_pass)
+                        server.send_message(msg)
+
+                    flash("A temporary password has been emailed to you. Check your inbox.", "success")
+                except Exception as e:
+                    # If email fails, fall back to flashing temp password (development fallback)
+                    flash(f"Email sending failed ({str(e)}). Temporary password: {temp_pw}", "warning")
+            else:
+                # SMTP not configured — show temporary password on screen (dev fallback)
+                flash(f"Temporary password generated: {temp_pw} — please login and change it.", "success")
+        else:
+            # Keep messaging generic to avoid leaking account existence
+            flash("If this email exists, a password reset link has been sent. Check your email.", "success")
+
+        # Redirect to login after handling reset
+        return redirect(url_for('login'))
+    
+    return render_template('forgot_password.html')
 
 @app.route('/dashboard')
 def dashboard():

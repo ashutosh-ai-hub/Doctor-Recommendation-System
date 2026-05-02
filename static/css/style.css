@@ -20,9 +20,25 @@ body {
     color: var(--text-main);
     margin: 0;
     min-height: 100vh;
+    overflow-x: hidden;
 }
 
 .hidden { display: none !important; }
+
+/* Mobile Menu Toggle Button */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-main);
+    padding: 10px;
+}
+
+.menu-toggle:hover {
+    color: var(--primary);
+}
 
 /* Header with Glassmorphism */
 .app-header {
@@ -44,6 +60,9 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+    position: relative;
 }
 
 .logo {
@@ -51,6 +70,50 @@ body {
     color: var(--primary);
     font-size: 1.5rem;
     letter-spacing: -0.5px;
+    white-space: nowrap;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+/* Mobile / Tablet Navigation */
+#nav-menu {
+    transition: all 0.25s ease;
+}
+
+.menu-toggle {
+    /* shown at smaller widths via media queries */
+}
+
+@media (max-width: 991px) {
+    .menu-toggle { display: block; }
+    nav { justify-content: flex-end; }
+
+    /* hide nav by default on small screens, show when active */
+    #nav-menu {
+        display: none;
+        position: absolute;
+        right: 20px;
+        top: 64px;
+        background: rgba(255,255,255,0.98);
+        border-radius: 12px;
+        padding: 10px 14px;
+        box-shadow: var(--shadow-md);
+        flex-direction: column;
+        gap: 8px;
+        min-width: 160px;
+        z-index: 200;
+    }
+
+    #nav-menu.active { display: flex; }
+
+    #nav-menu a, #nav-menu span.user-welcome { display: block; padding: 8px 10px; }
 }
 
 nav span {
@@ -134,6 +197,32 @@ nav span {
 .input-wrapper {
     display: flex;
     gap: 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-content { margin: 40px auto; }
+    .hero-section h1 { font-size: 1.8rem; }
+    .hero-section p { font-size: 1rem; max-width: 100%; }
+
+    .input-wrapper { flex-direction: column; align-items: stretch; }
+    input { padding: 14px 16px; font-size: 1rem; }
+    #analyze-btn { width: 100%; padding: 12px; }
+
+    .search-container { padding: 16px; }
+
+    #doctor-grid { gap: 16px; }
+
+    .doctor-card { padding: 18px; }
+
+    .modal-content { width: 92%; padding: 20px; }
+}
+
+@media (max-width: 420px) {
+    .hero-section h1 { font-size: 1.5rem; }
+    .logo { font-size: 1.2rem; }
+    .location-select { min-width: 140px; }
+    #doctor-grid { grid-template-columns: 1fr; }
 }
 
 input {
@@ -674,4 +763,595 @@ input:focus {
     display: flex;
     align-items: center;
     gap: 10px;
+}
+
+/* ===== RESPONSIVE MEDIA QUERIES ===== */
+
+/* Extra Large Screens (1200px and up) */
+@media (min-width: 1200px) {
+    .main-content {
+        margin: 80px auto;
+    }
+    
+    .hero-section h1 {
+        font-size: 3.5rem;
+    }
+}
+
+/* Large Screens (992px to 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .main-content {
+        max-width: 900px;
+        margin: 70px auto;
+    }
+    
+    .hero-section h1 {
+        font-size: 2.8rem;
+    }
+    
+    #doctor-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+}
+
+/* Tablets (768px to 991px) */
+@media (max-width: 991px) {
+    .menu-toggle {
+        display: block;
+    }
+    
+    .header-content {
+        padding: 0 15px;
+    }
+    
+    .logo {
+        font-size: 1.3rem;
+    }
+    
+    nav {
+        position: fixed;
+        top: 60px;
+        right: -100%;
+        width: 100%;
+        max-width: 300px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(12px);
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        border-left: 1px solid var(--border);
+        padding: 20px;
+        z-index: 99;
+        transition: right 0.3s ease;
+        border-radius: 0;
+        box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    nav.active {
+        right: 0;
+    }
+    
+    nav span {
+        width: 100%;
+        margin-bottom: 10px;
+        display: block;
+    }
+    
+    .nav-link {
+        display: block;
+        padding: 12px;
+        margin-left: 0;
+        border-radius: 8px;
+        margin-bottom: 5px;
+        text-align: left;
+    }
+    
+    .nav-link:hover {
+        background: var(--primary-light);
+    }
+    
+    .signup-btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .main-content {
+        max-width: 100%;
+        margin: 60px 20px;
+        padding: 0;
+    }
+    
+    .hero-section {
+        margin-bottom: 30px;
+    }
+    
+    .hero-section h1 {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+    }
+    
+    .hero-section p {
+        font-size: 1rem;
+    }
+    
+    .search-container {
+        padding: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .filter-controls {
+        margin-bottom: 12px;
+    }
+    
+    .location-select {
+        min-width: 150px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .input-wrapper {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    input {
+        padding: 14px 16px;
+        font-size: 1rem;
+    }
+    
+    #analyze-btn {
+        padding: 0 20px;
+        font-size: 1rem;
+        width: 100%;
+    }
+    
+    #doctor-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .doctor-card {
+        padding: 20px;
+    }
+    
+    .doctor-card h3 {
+        font-size: 1.1rem;
+    }
+    
+    .modal-content {
+        width: calc(100% - 40px);
+        max-width: 350px;
+        padding: 30px 20px;
+    }
+    
+    .chat-container {
+        bottom: 20px;
+        right: 20px;
+        width: 300px;
+        height: 420px;
+    }
+    
+    .auth-card {
+        padding: 30px 20px;
+    }
+    
+    .auth-card h2 {
+        font-size: 1.8rem;
+    }
+    
+    /* Dashboard responsive */
+    .dashboard-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .sidebar {
+        display: none;
+        position: fixed;
+        left: -100%;
+        top: 60px;
+        width: 260px;
+        height: calc(100vh - 60px);
+        z-index: 98;
+        transition: left 0.3s ease;
+        border-right: 1px solid var(--border);
+        overflow-y: auto;
+    }
+    
+    .sidebar.active {
+        display: flex;
+        left: 0;
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dash-content {
+        padding: 30px 15px;
+    }
+    
+    .dash-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
+
+/* Small Devices - Phones (480px to 767px) */
+@media (max-width: 767px) {
+    .header-content {
+        padding: 0 12px;
+    }
+    
+    .logo {
+        font-size: 1.1rem;
+    }
+    
+    .main-content {
+        margin: 50px 15px;
+    }
+    
+    .hero-section {
+        margin-bottom: 25px;
+    }
+    
+    .hero-section h1 {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+        line-height: 1.2;
+    }
+    
+    .hero-section p {
+        font-size: 0.95rem;
+    }
+    
+    .search-container {
+        padding: 12px;
+        margin-bottom: 25px;
+        border-radius: 16px;
+    }
+    
+    .filter-controls {
+        margin-bottom: 10px;
+    }
+    
+    .location-select {
+        min-width: 100%;
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .input-wrapper {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    input {
+        padding: 12px 14px;
+        font-size: 16px; /* Prevents zoom on iOS */
+        border-radius: 12px;
+    }
+    
+    input::placeholder {
+        font-size: 0.85rem;
+    }
+    
+    #analyze-btn {
+        padding: 0 16px;
+        font-size: 0.95rem;
+        width: 100%;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .prediction-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    #doctor-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .doctor-card {
+        padding: 15px;
+    }
+    
+    .doctor-card h3 {
+        font-size: 1rem;
+    }
+    
+    .stats {
+        font-size: 0.9rem;
+    }
+    
+    .location {
+        font-size: 0.9rem;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 4px 8px;
+    }
+    
+    .btn-booking {
+        padding: 10px;
+        font-size: 0.95rem;
+        height: 44px;
+        border-radius: 10px;
+    }
+    
+    .modal-content {
+        width: calc(100% - 30px);
+        max-width: 320px;
+        padding: 25px 15px;
+        border-radius: 20px;
+    }
+    
+    .modal-content h2 {
+        font-size: 1.4rem;
+    }
+    
+    .modal-content p {
+        font-size: 0.9rem;
+    }
+    
+    .btn-primary-modal,
+    .btn-secondary-modal {
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+    
+    .chat-container {
+        bottom: 15px;
+        right: 15px;
+        width: 280px;
+        height: 400px;
+        border-radius: 16px;
+    }
+    
+    .chat-container.minimized {
+        width: 180px;
+        height: 50px;
+        border-radius: 25px;
+    }
+    
+    .chat-header {
+        padding: 14px 16px;
+        font-size: 0.95rem;
+    }
+    
+    .chat-body {
+        padding: 15px;
+        gap: 10px;
+    }
+    
+    .bot-msg,
+    .user-msg {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+        max-width: 90%;
+    }
+    
+    .chat-input-area {
+        padding: 12px;
+        gap: 8px;
+    }
+    
+    .chat-input-area input {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .chat-input-area button {
+        padding: 0 14px;
+        font-size: 0.9rem;
+    }
+    
+    .auth-container {
+        min-height: 100vh;
+        padding: 20px 15px;
+    }
+    
+    .auth-card {
+        padding: 20px 15px;
+        border-radius: 20px;
+    }
+    
+    .auth-card h2 {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+    
+    .auth-card p {
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-group label {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+    
+    .form-group input {
+        font-size: 16px; /* Prevents zoom */
+    }
+    
+    .btn-auth {
+        padding: 14px;
+        font-size: 1rem;
+        margin-top: 10px;
+        height: 48px;
+    }
+    
+    .auth-footer {
+        margin-top: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .nav-link {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .grid-header {
+        font-size: 1.1rem;
+    }
+    
+    /* Dashboard responsive for mobile */
+    .dash-content {
+        padding: 20px 12px;
+    }
+    
+    .stat-card {
+        padding: 20px;
+    }
+    
+    .stat-card h3 {
+        font-size: 0.9rem;
+    }
+    
+    .stat-card .value {
+        font-size: 2rem;
+    }
+}
+
+/* Extra Small Phones (320px to 479px) */
+@media (max-width: 479px) {
+    .logo {
+        font-size: 0.95rem;
+    }
+    
+    .app-header {
+        padding: 12px 0;
+    }
+    
+    .main-content {
+        margin: 40px 10px;
+    }
+    
+    .hero-section h1 {
+        font-size: 1.5rem;
+    }
+    
+    .hero-section p {
+        font-size: 0.9rem;
+    }
+    
+    .search-container {
+        padding: 10px;
+        border-radius: 14px;
+    }
+    
+    .location-select {
+        font-size: 0.85rem;
+        padding: 8px;
+    }
+    
+    input {
+        padding: 10px 12px;
+        font-size: 16px;
+        border-radius: 10px;
+    }
+    
+    #analyze-btn {
+        font-size: 0.9rem;
+        padding: 0 12px;
+        height: 44px;
+    }
+    
+    #doctor-grid {
+        gap: 12px;
+        margin-top: 15px;
+    }
+    
+    .doctor-card {
+        padding: 12px;
+        border-radius: 16px;
+    }
+    
+    .doctor-card h3 {
+        font-size: 0.95rem;
+    }
+    
+    .chat-container {
+        width: 260px;
+        height: 380px;
+        bottom: 10px;
+        right: 10px;
+    }
+    
+    .modal-content {
+        width: calc(100% - 20px);
+        max-width: 280px;
+        padding: 20px 12px;
+    }
+    
+    .modal-content h2 {
+        font-size: 1.2rem;
+    }
+    
+    .auth-card {
+        padding: 15px 12px;
+        max-width: 100%;
+    }
+    
+    .auth-card h2 {
+        font-size: 1.3rem;
+    }
+}
+
+/* Touch-friendly adjustments */
+@media (hover: none) and (pointer: coarse) {
+    .btn-booking,
+    .btn-auth,
+    #analyze-btn,
+    .btn-primary-modal,
+    .btn-secondary-modal {
+        min-height: 48px;
+        padding: 12px;
+    }
+    
+    .nav-link,
+    .chat-header button {
+        min-height: 44px;
+        padding: 10px 12px;
+    }
+    
+    input {
+        min-height: 44px;
+        padding: 12px 14px;
+        font-size: 16px;
+    }
+    
+    button {
+        min-height: 44px;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 600px) and (orientation: landscape) {
+    .main-content {
+        margin: 30px auto;
+    }
+    
+    .hero-section {
+        margin-bottom: 15px;
+    }
+    
+    .hero-section h1 {
+        font-size: 1.6rem;
+    }
+    
+    .chat-container {
+        height: 350px;
+    }
+    
+    .modal-content {
+        padding: 20px;
+    }
 }

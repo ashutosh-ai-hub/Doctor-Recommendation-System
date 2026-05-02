@@ -33,13 +33,60 @@
         }
         .insight-box h3 { margin-top: 0; color: #0284c7; }
         .insight-box ul { margin-bottom: 0; }
+        
+        @media (max-width: 767px) {
+            .analysis-container {
+                margin: 30px auto;
+                padding: 15px;
+            }
+            
+            .chart-card {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .chart-card h2 {
+                font-size: 1.3rem;
+            }
+            
+            .insight-box {
+                padding: 15px;
+                border-left-width: 4px;
+            }
+            
+            .insight-box h3 {
+                font-size: 1.1rem;
+                margin-bottom: 10px;
+            }
+            
+            .insight-box ul {
+                font-size: 0.95rem;
+            }
+        }
+        
+        @media (max-width: 479px) {
+            .analysis-container {
+                margin: 20px auto;
+                padding: 12px;
+            }
+            
+            .chart-card {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+            
+            .chart-card h2 {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>
     <header class="app-header">
         <div class="header-content">
             <span class="logo">⚕️ SmartHealth AI</span>
-            <nav>
+            <button class="menu-toggle" id="menu-toggle">☰</button>
+            <nav id="nav-menu">
                 <a href="/" class="nav-link">Home</a>
             </nav>
         </div>
@@ -86,5 +133,34 @@
             <a href="/" class="btn-auth" style="display: inline-block; width: auto; padding: 15px 40px;">Back to Home</a>
         </div>
     </div>
+    
+    <script>
+        // Mobile Menu Toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuToggle = document.getElementById('menu-toggle');
+            const navMenu = document.getElementById('nav-menu');
+            
+            if (menuToggle && navMenu) {
+                menuToggle.addEventListener('click', () => {
+                    navMenu.classList.toggle('active');
+                    menuToggle.style.color = navMenu.classList.contains('active') ? 'var(--primary)' : 'var(--text-main)';
+                });
+                
+                navMenu.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navMenu.classList.remove('active');
+                        menuToggle.style.color = 'var(--text-main)';
+                    });
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.app-header')) {
+                        navMenu.classList.remove('active');
+                        menuToggle.style.color = 'var(--text-main)';
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

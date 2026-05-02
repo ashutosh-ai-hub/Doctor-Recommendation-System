@@ -1,6 +1,40 @@
 let currentBooking = {}; 
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Mobile Menu Toggle
+    const menuToggle = document.getElementById('menu-toggle');
+    const navMenu = document.getElementById('nav-menu');
+    
+    if (menuToggle && navMenu) {
+        menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            menuToggle.style.color = navMenu.classList.contains('active') ? 'var(--primary)' : 'var(--text-main)';
+        });
+        
+        // Close menu when a nav link is clicked
+        navMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                menuToggle.style.color = 'var(--text-main)';
+            });
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.app-header')) {
+                navMenu.classList.remove('active');
+                menuToggle.style.color = 'var(--text-main)';
+            }
+        });
+    }
+    
+    // Close mobile menu on window resize
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 991) {
+            navMenu?.classList.remove('active');
+        }
+    });
+    
     const analyzeBtn = document.getElementById('analyze-btn');
     const symptomInput = document.getElementById('symptom-input');
     const locationFilter = document.getElementById('location-filter');

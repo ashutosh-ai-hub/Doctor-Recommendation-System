@@ -13,6 +13,7 @@
     <header class="app-header">
         <div class="header-content">
             <a href="/" style="text-decoration: none;"><span class="logo">⚕️ SmartHealth AI</span></a>
+            <button class="menu-toggle" id="menu-toggle">☰</button>
         </div>
     </header>
 
@@ -37,6 +38,9 @@
                 <div class="form-group">
                     <label>Password</label>
                     <input type="password" name="password" required>
+                </div>
+                <div style="text-align: right; margin-bottom: 15px;">
+                    <a href="{{ url_for('forgot_password') }}" style="color: var(--primary); text-decoration: none; font-size: 0.9rem; font-weight: 500;">Forgot Password?</a>
                 </div>
                 <button type="submit" class="btn-auth">Login Now</button>
             </form>
