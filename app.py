@@ -365,7 +365,7 @@ def register():
             session['user_id'] = user_id
             session['user_name'] = name
             flash("Registration successful — welcome!", "success")
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('home'))
         except Exception as e:
             # Log the exception for debugging
             app.logger.exception("Error during registration")
