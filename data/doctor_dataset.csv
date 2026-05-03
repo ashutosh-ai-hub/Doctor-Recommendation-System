@@ -499,36 +499,36 @@ Dr. Rohan Gupta,Orthopedic,17,4.6,Mumbai
 Dr. Kabir Sharma,Orthopedic,3,4.7,Bangalore
 Dr. Sonia Verma,Dermatologist,13,4.9,Ahmedabad
 Dr. Rahul Chatterjee,General Physician,18,4.5,Pune
-Dr. Vikas 0,ENT Specialist,6,3.5,Bangalore
-Dr. Ramesh 1,ENT Specialist,18,4.6,Pune
-Dr. Ramesh 2,ENT Specialist,23,3.8,Mumbai
-Dr. Suresh 3,ENT Specialist,14,4.2,Delhi
-Dr. Ramesh 4,ENT Specialist,3,4.6,Pune
-Dr. Kiran 5,ENT Specialist,14,3.8,Delhi
-Dr. Pooja 6,ENT Specialist,22,4.1,Delhi
-Dr. Vikas 7,ENT Specialist,16,4.4,Chennai
-Dr. Suresh 8,ENT Specialist,22,4.3,Delhi
-Dr. Rohit 9,ENT Specialist,22,4.6,Mumbai
-Dr. Kiran 0,Dentist,10,4.0,Delhi
-Dr. Pooja 1,Dentist,8,4.9,Chennai
-Dr. Ramesh 2,Dentist,17,3.9,Delhi
-Dr. Manisha 3,Dentist,23,4.7,Delhi
-Dr. Kiran 4,Dentist,17,3.7,Mumbai
-Dr. Suresh 5,Dentist,21,3.9,Delhi
-Dr. Manisha 6,Dentist,23,4.2,Mumbai
-Dr. Kiran 7,Dentist,9,4.1,Pune
-Dr. Swati 8,Dentist,11,3.8,Pune
-Dr. Rohit 9,Dentist,4,4.1,Pune
-Dr. Manisha 0,Pulmonologist,16,4.8,Bangalore
-Dr. Vikas 1,Pulmonologist,6,4.5,Chennai
-Dr. Ramesh 2,Pulmonologist,20,4.2,Bangalore
-Dr. Suresh 3,Pulmonologist,13,3.8,Bangalore
-Dr. Kiran 4,Pulmonologist,3,4.8,Delhi
-Dr. Ramesh 5,Pulmonologist,25,4.2,Chennai
-Dr. Rohit 6,Pulmonologist,16,3.6,Bangalore
-Dr. Ramesh 7,Pulmonologist,6,3.5,Mumbai
-Dr. Manisha 8,Pulmonologist,4,4.3,Bangalore
-Dr. Vikas 9,Pulmonologist,16,4.0,Delhi
+Dr. Vikas Patel,ENT Specialist,6,3.5,Bangalore
+Dr. Ramesh Mishra,ENT Specialist,18,4.6,Pune
+Dr. Ramesh Gupta,ENT Specialist,23,3.8,Mumbai
+Dr. Suresh Kumar,ENT Specialist,14,4.2,Delhi
+Dr. Ramesh Verma,ENT Specialist,3,4.6,Pune
+Dr. Kiran Iyer,ENT Specialist,14,3.8,Delhi
+Dr. Pooja Jain,ENT Specialist,22,4.1,Delhi
+Dr. Vikas Nair,ENT Specialist,16,4.4,Chennai
+Dr. Suresh Kapoor,ENT Specialist,22,4.3,Delhi
+Dr. Rohit Malhotra,ENT Specialist,22,4.6,Mumbai
+Dr. Kiran Rao,Dentist,10,4.0,Delhi
+Dr. Pooja Sharma,Dentist,8,4.9,Chennai
+Dr. Ramesh Gupta,Dentist,17,3.9,Delhi
+Dr. Manisha Patel,Dentist,23,4.7,Delhi
+Dr. Kiran Mehta,Dentist,17,3.7,Mumbai
+Dr. Suresh Malhotra,Dentist,21,3.9,Delhi
+Dr. Manisha Desai,Dentist,23,4.2,Mumbai
+Dr. Kiran Desai,Dentist,9,4.1,Pune
+Dr. Swati Shah,Dentist,11,3.8,Pune
+Dr. Rohit Malhotra,Dentist,4,4.1,Pune
+Dr. Manisha Kapoor,Pulmonologist,16,4.8,Bangalore
+Dr. Vikas Sharma,Pulmonologist,6,4.5,Chennai
+Dr. Ramesh Gupta,Pulmonologist,20,4.2,Bangalore
+Dr. Suresh Kumar,Pulmonologist,13,3.8,Bangalore
+Dr. Kiran Mehta,Pulmonologist,3,4.8,Delhi
+Dr. Ramesh Singh,Pulmonologist,25,4.2,Chennai
+Dr. Rohit Jain,Pulmonologist,16,3.6,Bangalore
+Dr. Ramesh Shah,Pulmonologist,6,3.5,Mumbai
+Dr. Manisha Iyer,Pulmonologist,4,4.3,Bangalore
+Dr. Vikas Reddy,Pulmonologist,16,4.0,Delhi
 Dr. Sameer Khan,Oncologist,15,4.8,Mumbai
 Dr. Anjali Verma,Oncologist,12,4.5,Delhi
 Dr. Vikram Singh,Oncologist,18,4.7,Bangalore
@@ -544,3 +544,6 @@ Dr. Aditi Nair,Gynecologist,14,4.6,Hyderabad
 Dr. Sanjay Gupta,Oncologist,22,4.9,Mumbai
 Dr. Anita Desai,Oncologist,18,4.8,Delhi
 Dr. Vikram Seth,Oncologist,15,4.7,Bangalore
+Dr. Rohan Mehta,Infectious Disease Specialist,14,4.8,Mumbai
+Dr. Ananya Banerjee,Infectious Disease Specialist,11,4.6,Delhi
+Dr. Sameer Shah,Infectious Disease Specialist,13,4.7,Bangalore
